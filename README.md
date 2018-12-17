@@ -40,25 +40,9 @@ Note that exchange calendars are defined by their [ISO-10383 market identifier c
 ```python
 from trading_calendars import get_calendar
 
-# US Stock Exchanges (includes NASDAQ)
-us_calendar = get_calendar('XNYS')
-# London Stock Exchange
-london_calendar = get_calendar('XLON')
-# Toronto Stock Exchange
-toronto_calendar = get_calendar('XTSE')
-# Tokyo Stock Exchange
-tokyo_calendar = get_calendar('XTKS')
-# Frankfurt Stock Exchange
-frankfurt_calendar = get_calendar('XFRA')
+# 不考虑午休时间，当前日历年度为1999~2025
+# A股交易日 (上交所、深交所)
+calendar = get_calendar('XSHG')
 
-# US Futures
-us_futures_calendar = get_calendar('us_futures')
-# Chicago Mercantile Exchange
-cme_calendar = get_calendar('CMES')
-# Intercontinental Exchange
-ice_calendar = get_calendar('IEPA')
-# CBOE Futures Exchange
-cfe_calendar = get_calendar('XCBF')
-# Brazilian Mercantile and Futures Exchange
-bmf_calendar = get_calendar('BVMF')
+calendar.actual_last_session
 ```
