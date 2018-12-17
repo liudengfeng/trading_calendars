@@ -77,3 +77,5 @@ TAGS
 
 etc/lunar-ecliptic-longitude/*
 etc/solar-ecliptic-longitude/*
+
+.vs/
