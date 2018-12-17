@@ -492,3 +492,11 @@ class XSHGExchangeCalendar(PrecomputedTradingCalendar):
     @property
     def precomputed_holidays(self):
         return precomputed_shanghai_holidays
+
+    @property
+    def actual_last_session(self):
+        """实际最后交易日"""
+        now = pd.Timestamp.utcnow()
+        trading_days = self.all_sessions
+        actual = trading_days[trading_days.get_loc(now, method='ffill')]
+        return actual
