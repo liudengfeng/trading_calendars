@@ -71,7 +71,7 @@ precomputed_shanghai_holidays = pd.to_datetime([
     '1997-07-01',
     '1997-10-01',
     '1997-10-02',
-    '1997-10-03',  
+    '1997-10-03',
     '1998-01-01',
     '1998-01-02',
     '1998-01-26',
@@ -583,6 +583,3 @@ class XSHGExchangeCalendar(PrecomputedTradingCalendar):
         trading_days = self.all_sessions
         actual = trading_days[trading_days.get_loc(now, method='ffill')]
         return actual
-
-
-
