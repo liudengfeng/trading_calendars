@@ -40,7 +40,7 @@ Note that exchange calendars are defined by their [ISO-10383 market identifier c
 ```python
 from trading_calendars import get_calendar
 
-# 不考虑午休时间，当前日历年度为1999~2025
+# 不考虑午休时间，日历期间为1990-12-19 ~ 2025-12-31
 # A股交易日 (上交所、深交所)
 calendar = get_calendar('XSHG')
 
