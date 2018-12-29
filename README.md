@@ -46,3 +46,6 @@ calendar = get_calendar('XSHG')
 
 calendar.actual_last_session
 ```
+
+## Install
+在windows 10中python 3.7环境下安装`lru-dict`,[下载](https://www.lfd.uci.edu/~gohlke/pythonlibs/#lru_dict)后使用`pip install .whl`
