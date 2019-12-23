@@ -4,19 +4,26 @@ from functools import lru_cache
 import pandas as pd
 from pytz import timezone
 
-from cnswd.sql.base import get_session
-from cnswd.sql.szsh import TradingCalendar
+from cnswd.reader import trading_calendar
+from cnswd.setting.constants import MARKET_START
 
 from .precomputed_trading_calendar import PrecomputedTradingCalendar
 
 
 @lru_cache()
 def get_shanghai_holidays():
-    sess = get_session('szsh')
-    return sess.query(TradingCalendar.日期).filter(TradingCalendar.交易日 == 0).all()
+    trading_dates = trading_calendar()
+    trading_dates = pd.DatetimeIndex(trading_dates)
+    all_dates = pd.date_range(MARKET_START.tz_localize(None),
+                              pd.Timestamp('today'),
+                              freq='D')
+    holidays = [x for x in all_dates if x not in trading_dates]
+    return holidays
+
 
 # 如不能正确处理交易日期，会导致fill出现错误
-precomputed_shanghai_holidays = pd.to_datetime([x[0] for x in get_shanghai_holidays()])
+precomputed_shanghai_holidays = pd.to_datetime(
+    [x for x in get_shanghai_holidays()])
 
 # # 增加1990-12-19 ~ 1999-12-31期间假日
 # precomputed_shanghai_holidays = pd.to_datetime([
@@ -580,12 +587,8 @@ class XSHGExchangeCalendar(PrecomputedTradingCalendar):
 
     name = "XSHG"
     tz = timezone("Asia/Shanghai")
-    open_times = (
-        (None, time(9, 31)),
-    )
-    close_times = (
-        (None, time(15, 0)),
-    )
+    open_times = ((None, time(9, 31)), )
+    close_times = ((None, time(15, 0)), )
 
     @property
     def precomputed_holidays(self):
