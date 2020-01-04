@@ -4,7 +4,7 @@ from functools import lru_cache
 import pandas as pd
 from pytz import timezone
 
-from cnswd.reader import trading_calendar
+from cnswd.reader import calendar
 from cnswd.setting.constants import MARKET_START
 
 from .precomputed_trading_calendar import PrecomputedTradingCalendar
@@ -12,7 +12,7 @@ from .precomputed_trading_calendar import PrecomputedTradingCalendar
 
 @lru_cache()
 def get_shanghai_holidays():
-    trading_dates = trading_calendar()
+    trading_dates = calendar()
     trading_dates = pd.DatetimeIndex(trading_dates)
     all_dates = pd.date_range(MARKET_START.tz_localize(None),
                               pd.Timestamp('today'),
