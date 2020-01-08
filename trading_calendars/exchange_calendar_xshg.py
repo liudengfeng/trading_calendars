@@ -43,10 +43,10 @@ class XSHGExchangeCalendar(PrecomputedTradingCalendar):
     name = "XSHG"
     tz = timezone("Asia/Shanghai")
     open_times = ((None, time(9, 31)), )
-    am_end = ((None, time(11, 30)), )
-    # 自1开始，每天240个交易分钟
+    am_end = ((None, time(11, 31)), )
+    # 由于数据延时问题，自1开始，结束分钟+1，每天242个交易分钟。
     pm_start = ((None, time(13, 1)), )
-    close_times = ((None, time(15, 0)), )
+    close_times = ((None, time(15, 1)), )
 
 
     @property
