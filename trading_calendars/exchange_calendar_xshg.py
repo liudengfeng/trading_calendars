@@ -7,7 +7,7 @@ from pytz import timezone
 from cnswd.mongodb import get_db
 from cnswd.setting.constants import MARKET_START
 
-from .precomputed_trading_calendar import PrecomputedTradingCalendar
+from .precomputed_trading_calendar_cn import PrecomputedTradingCalendar
 
 
 @lru_cache()
@@ -48,7 +48,6 @@ class XSHGExchangeCalendar(PrecomputedTradingCalendar):
     # 由于数据延时问题，自1开始，结束分钟+1，每天242个交易分钟。
     pm_start = ((None, time(13, 1)), )
     close_times = ((None, time(15, 1)), )
-
 
     @property
     def precomputed_holidays(self):
