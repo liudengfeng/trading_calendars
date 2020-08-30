@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 
 NANOSECONDS_PER_MINUTE = int(6e10)
 

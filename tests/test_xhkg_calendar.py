@@ -3,7 +3,7 @@ from unittest import TestCase
 import pandas as pd
 from pytz import UTC
 
-from .test_trading_calendar import ExchangeCalendarTestBase
+from test_trading_calendar import ExchangeCalendarTestBase
 from .test_utils import T
 from trading_calendars.exchange_calendar_xhkg import XHKGExchangeCalendar
 

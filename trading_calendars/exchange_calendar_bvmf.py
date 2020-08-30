@@ -14,6 +14,8 @@
 # limitations under the License.
 
 from datetime import time
+
+import pandas as pd
 from pandas.tseries.holiday import (
     Holiday,
     Easter,
@@ -79,11 +81,18 @@ DiaTrabalho = Holiday(
     day=1,
 )
 # Constitutionalist Revolution
-Constitucionalista = Holiday(
-    'Constitucionalista',
+Constitucionalista_prepandemic = Holiday(
+    'Constitucionalista pre-pandemia',
     month=7,
     day=9,
-    start_date='1998-01-01'
+    start_date='1998-01-01',
+    end_date='2020-01-01'
+)
+Constitucionalista_pospandemic = Holiday(
+    'Constitucionalista pos-pandemia',
+    month=7,
+    day=9,
+    start_date='2021-01-01'
 )
 # Independence Day
 Independencia = Holiday(
@@ -149,7 +158,9 @@ class BVMFExchangeCalendar(TradingCalendar):
     Exchange calendar for BM&F BOVESPA (BVMF).
 
     Open Time: 10:00 AM, Brazil/Sao Paulo
-    Close Time: 5:00 PM, Brazil/Sao Paulo
+    Close Time:
+    - Until 2019-11-01: 5:00 PM, Brazil/Sao Paulo
+    - Starting from 2019-11-04: 6:00 PM, Brazil/Sao Paulo
 
     Regularly-Observed Holidays:
     - Universal Confraternization (New year's day, Jan 1)
@@ -183,6 +194,7 @@ class BVMFExchangeCalendar(TradingCalendar):
 
     close_times = (
         (None, time(17, 0)),
+        (pd.Timestamp('2019-11-04'), time(18, 0)),
     )
 
     @property
@@ -200,7 +212,8 @@ class BVMFExchangeCalendar(TradingCalendar):
             CorpusChristi,
             Tiradentes,
             DiaTrabalho,
-            Constitucionalista,
+            Constitucionalista_prepandemic,
+            Constitucionalista_pospandemic,
             Independencia,
             Aparecida,
             Finados,

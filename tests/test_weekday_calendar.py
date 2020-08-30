@@ -5,7 +5,7 @@ from pandas.util.testing import assert_index_equal
 from pytz import UTC
 
 from trading_calendars.weekday_calendar import WeekdayCalendar
-from .test_trading_calendar import ExchangeCalendarTestBase
+from test_trading_calendar import ExchangeCalendarTestBase
 
 
 class WeekdayCalendarTestCase(ExchangeCalendarTestBase, TestCase):

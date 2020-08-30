@@ -5,7 +5,7 @@ from pytz import UTC
 
 from trading_calendars.exchange_calendar_xwar import XWARExchangeCalendar
 
-from .test_trading_calendar import ExchangeCalendarTestBase
+from test_trading_calendar import ExchangeCalendarTestBase
 
 
 class XWARCalendarTestCase(ExchangeCalendarTestBase, TestCase):
