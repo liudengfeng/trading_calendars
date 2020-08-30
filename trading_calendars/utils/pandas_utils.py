@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from pytz import UTC
+from pytz import UTC, timezone
 
 
 def days_at_time(days, t, tz, day_offset=0):
@@ -65,3 +65,34 @@ def vectorized_sunday_to_monday(dtix):
     values = dtix.values.copy()
     values[dtix.weekday == 6] += np.timedelta64(1, 'D')
     return pd.DatetimeIndex(values)
+
+
+def all_trading_minutes(start, end,
+                        am_start='09:31', am_end='11:30',
+                        pm_start='13:01', pm_end='15:00',
+                        tz=timezone('Asia/Shanghai')):
+    """除去午休时刻的交易分钟
+
+    Args:
+        start (datetime-like): 开始时刻 
+        end (datetime-like): 结束时刻
+        am_start (time): 上午开盘时刻
+        am_end (time): 上午收盘时刻
+        pm_start (time): 下午开盘时刻
+        pm_end (time): 下午收盘时刻
+        tz (时区): 所在时区
+
+    Returns:
+        DatetimeIndex: 交易分钟
+
+    Notes:
+        输出UTC时区交易分钟
+    """
+    minutes = pd.date_range(start, end, freq='min')
+    if minutes.tz is None:
+        minutes = minutes.tz_localize(tz)
+    elif minutes.tz != tz:
+        minutes = minutes.tz_convert(tz)
+    am_locs = minutes.indexer_between_time(am_start, am_end)
+    pm_locs = minutes.indexer_between_time(pm_start, pm_end)
+    return minutes[am_locs].append(minutes[pm_locs]).sort_values().tz_convert(UTC)

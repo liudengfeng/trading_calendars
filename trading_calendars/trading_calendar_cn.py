@@ -777,6 +777,56 @@ class TradingCalendar(with_metaclass(ABCMeta)):
             sched.at[session_label, 'market_close'].tz_localize('UTC'),
         )
 
+    def am_open_and_close_for_session(self, session_label):
+        """
+        Returns a tuple of am timestamps of the open and close of the session
+        represented by the given label.
+
+        Parameters
+        ----------
+        session_label: pd.Timestamp
+            The session whose open and close are desired.
+
+        Returns
+        -------
+        (Timestamp, Timestamp)
+            The open and close for the given session.
+        """
+        sched = self.schedule
+
+        # `market_open` and `market_close` should be timezone aware, but pandas
+        # 0.16.1 does not appear to support this:
+        # http://pandas.pydata.org/pandas-docs/stable/whatsnew.html#datetime-with-tz  # noqa
+        return (
+            sched.at[session_label, 'market_open'].tz_localize('UTC'),
+            sched.at[session_label, 'am_end'].tz_localize('UTC'),
+        )
+
+    def pm_open_and_close_for_session(self, session_label):
+        """
+        Returns a tuple of pm timestamps of the open and close of the session
+        represented by the given label.
+
+        Parameters
+        ----------
+        session_label: pd.Timestamp
+            The session whose open and close are desired.
+
+        Returns
+        -------
+        (Timestamp, Timestamp)
+            The open and close for the given session.
+        """
+        sched = self.schedule
+
+        # `market_open` and `market_close` should be timezone aware, but pandas
+        # 0.16.1 does not appear to support this:
+        # http://pandas.pydata.org/pandas-docs/stable/whatsnew.html#datetime-with-tz  # noqa
+        return (
+            sched.at[session_label, 'pm_start'].tz_localize('UTC'),
+            sched.at[session_label, 'market_close'].tz_localize('UTC'),
+        )
+
     def session_open(self, session_label):
         return self.schedule.at[session_label,
                                 'market_open'].tz_localize('UTC')

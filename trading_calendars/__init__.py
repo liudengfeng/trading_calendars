@@ -23,7 +23,7 @@ from .calendar_utils import (
     register_calendar_type,
     resolve_alias,
 )
-
+from .utils.pandas_utils import all_trading_minutes
 __all__ = [
     'clear_calendars',
     'deregister_calendar',
@@ -33,8 +33,9 @@ __all__ = [
     'register_calendar_type',
     'resolve_alias',
     'TradingCalendar',
+    'all_trading_minutes',
 ]
 
 from ._version import get_versions
-__version__ = '1.8.0' #get_versions()['version']
+__version__ = '1.8.0'  # get_versions()['version']
 del get_versions

@@ -1,4 +1,3 @@
-from datetime import time
 from os.path import abspath, dirname, join
 from unittest import TestCase
 
@@ -7,18 +6,10 @@ import pandas as pd
 from nose_parameterized import parameterized
 from pandas import Timedelta, read_csv
 from pandas.util.testing import assert_index_equal
-from pytz import UTC, timezone
-from toolz import concat
+from pytz import UTC
 
-from trading_calendars import get_calendar
-from trading_calendars.calendar_utils import (TradingCalendarDispatcher,
-                                              _default_calendar_aliases,
-                                              _default_calendar_factories)
-from trading_calendars.errors import CalendarNameCollision, InvalidCalendarName
-# from test_trading_calendar import ExchangeCalendarTestBase
-# from .test_utils import T
+from trading_calendars import all_trading_minutes, get_calendar
 from trading_calendars.exchange_calendar_xshg import XSHGExchangeCalendar
-from trading_calendars.trading_calendar import TradingCalendar, days_at_time
 
 
 def T(x):
@@ -65,6 +56,7 @@ class XSHGCalendarTestCase(TestCase):
     TEST_START_END_EXPECTED_LAST = pd.Timestamp('2010-01-08', tz=UTC)
 
     MAX_SESSION_HOURS = 5.5
+    HALF_SESSION_HOURS = 2.0
 
     HAVE_EARLY_CLOSES = False
 
@@ -111,6 +103,20 @@ class XSHGCalendarTestCase(TestCase):
             o, c = self.calendar.open_and_close_for_session(session)
             delta = c - o
             self.assertLessEqual(delta.seconds / 3600, self.MAX_SESSION_HOURS)
+
+    def test_sanity_check_am_session_lengths(self):
+        # make sure that no session is longer than self.HALF_SESSION_HOURS hours
+        for session in self.calendar.all_sessions:
+            o, c = self.calendar.am_open_and_close_for_session(session)
+            delta = c - o
+            self.assertLessEqual(delta.seconds / 3600, self.HALF_SESSION_HOURS)
+
+    def test_sanity_check_pm_session_lengths(self):
+        # make sure that no session is longer than self.HALF_SESSION_HOURS hours
+        for session in self.calendar.all_sessions:
+            o, c = self.calendar.pm_open_and_close_for_session(session)
+            delta = c - o
+            self.assertLessEqual(delta.seconds / 3600, self.HALF_SESSION_HOURS)
 
     def test_calculated_against_csv(self):
         assert_index_equal(self.calendar.schedule.index, self.answers.index)
@@ -429,13 +435,16 @@ class XSHGCalendarTestCase(TestCase):
             raise ValueError("Cannot find a full session to test!")
 
         minutes = self.calendar.minutes_for_session(full_session_label)
-        _open, _close = self.calendar.open_and_close_for_session(
+        am_open, am_close = self.calendar.am_open_and_close_for_session(
+            full_session_label
+        )
+        pm_open, pm_close = self.calendar.pm_open_and_close_for_session(
             full_session_label
         )
 
         np.testing.assert_array_equal(
             minutes,
-            pd.date_range(start=_open, end=_close, freq="min")
+            all_trading_minutes(am_open, pm_close)
         )
 
         # early close period
@@ -528,6 +537,7 @@ class XSHGCalendarTestCase(TestCase):
             first_open,
             last_close
         )
+        # 尽管区间前后各增加1分钟，区间交易分钟应该依然一致
         minutes2 = self.calendar.minutes_in_range(
             minute_before_first_open,
             minute_after_last_close
@@ -541,21 +551,9 @@ class XSHGCalendarTestCase(TestCase):
 
         # manually construct the minutes
         all_minutes = np.concatenate([
-            pd.date_range(
-                start=first_open,
-                end=first_close,
-                freq="min"
-            ),
-            pd.date_range(
-                start=middle_open,
-                end=middle_close,
-                freq="min"
-            ),
-            pd.date_range(
-                start=last_open,
-                end=last_close,
-                freq="min"
-            )
+            all_trading_minutes(first_open, first_close),
+            all_trading_minutes(middle_open, middle_close),
+            all_trading_minutes(last_open, last_close),
         ])
 
         np.testing.assert_array_equal(all_minutes, minutes1)
@@ -645,9 +643,9 @@ class XSHGCalendarTestCase(TestCase):
             self.answers.index[0],
             self.answers.index[-1],
         )
-
-        pd.util.testing.assert_series_equal(
-            found_opens, self.answers['market_open']
+        # 🆗 读取数据并不包含freq属性，改用值相等判断
+        np.testing.assert_array_equal(
+            found_opens.values, self.answers['market_open'].values
         )
 
     def test_session_closes_in_range(self):
@@ -655,9 +653,9 @@ class XSHGCalendarTestCase(TestCase):
             self.answers.index[0],
             self.answers.index[-1],
         )
-
-        pd.util.testing.assert_series_equal(
-            found_closes, self.answers['market_close']
+        # 🆗 读取数据并不包含freq属性，改用值相等判断
+        np.testing.assert_array_equal(
+            found_closes.values, self.answers['market_close'].values
         )
 
     def test_daylight_savings(self):
