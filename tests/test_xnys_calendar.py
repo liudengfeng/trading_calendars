@@ -1,5 +1,6 @@
 from unittest import TestCase
 import pandas as pd
+from pytz import UTC
 
 from .test_trading_calendar import ExchangeCalendarTestBase
 from trading_calendars.exchange_calendar_xnys import XNYSExchangeCalendar
@@ -15,15 +16,15 @@ class XNYSCalendarTestCase(ExchangeCalendarTestBase, TestCase):
     def test_2012(self):
         # holidays we expect:
         holidays_2012 = [
-            pd.Timestamp("2012-01-02", tz='UTC'),
-            pd.Timestamp("2012-01-16", tz='UTC'),
-            pd.Timestamp("2012-02-20", tz='UTC'),
-            pd.Timestamp("2012-04-06", tz='UTC'),
-            pd.Timestamp("2012-05-28", tz='UTC'),
-            pd.Timestamp("2012-07-04", tz='UTC'),
-            pd.Timestamp("2012-09-03", tz='UTC'),
-            pd.Timestamp("2012-11-22", tz='UTC'),
-            pd.Timestamp("2012-12-25", tz='UTC')
+            pd.Timestamp("2012-01-02", tz=UTC),
+            pd.Timestamp("2012-01-16", tz=UTC),
+            pd.Timestamp("2012-02-20", tz=UTC),
+            pd.Timestamp("2012-04-06", tz=UTC),
+            pd.Timestamp("2012-05-28", tz=UTC),
+            pd.Timestamp("2012-07-04", tz=UTC),
+            pd.Timestamp("2012-09-03", tz=UTC),
+            pd.Timestamp("2012-11-22", tz=UTC),
+            pd.Timestamp("2012-12-25", tz=UTC)
         ]
 
         for session_label in holidays_2012:
@@ -31,9 +32,9 @@ class XNYSCalendarTestCase(ExchangeCalendarTestBase, TestCase):
 
         # early closes we expect:
         early_closes_2012 = [
-            pd.Timestamp("2012-07-03", tz='UTC'),
-            pd.Timestamp("2012-11-23", tz='UTC'),
-            pd.Timestamp("2012-12-24", tz='UTC')
+            pd.Timestamp("2012-07-03", tz=UTC),
+            pd.Timestamp("2012-11-23", tz=UTC),
+            pd.Timestamp("2012-12-24", tz=UTC)
         ]
 
         for early_close_session_label in early_closes_2012:
@@ -53,6 +54,19 @@ class XNYSCalendarTestCase(ExchangeCalendarTestBase, TestCase):
         self.assertNotIn(pd.Period("10/29/2012"), self.calendar.all_sessions)
         self.assertNotIn(pd.Period("10/30/2012"), self.calendar.all_sessions)
 
+        # Hurricane Gloria
+        # Sep 27 1985
+        self.assertNotIn(pd.Period("09/27/1985"), self.calendar.all_sessions)
+
+        # New York Blackout
+        # Jul 14 1977
+        self.assertNotIn(pd.Period("07/14/1977"), self.calendar.all_sessions)
+
+        # closings for pre-1980 Presidential Election Days
+        self.assertNotIn(pd.Period("11/7/1972"), self.calendar.all_sessions)
+        self.assertNotIn(pd.Period("11/2/1976"), self.calendar.all_sessions)
+        self.assertNotIn(pd.Period("11/4/1980"), self.calendar.all_sessions)
+
         # various national days of mourning
 
         # George H.W. - 12/5/2018
@@ -67,6 +81,12 @@ class XNYSCalendarTestCase(ExchangeCalendarTestBase, TestCase):
         # Richard Nixon - 4/27/1994
         self.assertNotIn(pd.Period("4/27/1994"), self.calendar.all_sessions)
 
+        # Lyndon B. Johnson - 1/25/1973
+        self.assertNotIn(pd.Period("1/25/1973"), self.calendar.all_sessions)
+
+        # Harry S. Truman - 12/28/1972
+        self.assertNotIn(pd.Period("12/28/1972"), self.calendar.all_sessions)
+
     def test_new_years(self):
         """
         Check whether the TradingCalendar contains certain dates.
@@ -79,12 +99,12 @@ class XNYSCalendarTestCase(ExchangeCalendarTestBase, TestCase):
         # 22 23 24 25 26 27 28
         # 29 30 31
 
-        start_session = pd.Timestamp("2012-01-02", tz='UTC')
-        end_session = pd.Timestamp("2013-12-31", tz='UTC')
+        start_session = pd.Timestamp("2012-01-02", tz=UTC)
+        end_session = pd.Timestamp("2013-12-31", tz=UTC)
         sessions = self.calendar.sessions_in_range(start_session, end_session)
 
         day_after_new_years_sunday = pd.Timestamp("2012-01-02",
-                                                  tz='UTC')
+                                                  tz=UTC)
         self.assertNotIn(day_after_new_years_sunday, sessions,
                          """
  If NYE falls on a weekend, {0} the Monday after is a holiday.
@@ -92,7 +112,7 @@ class XNYSCalendarTestCase(ExchangeCalendarTestBase, TestCase):
         )
 
         first_trading_day_after_new_years_sunday = pd.Timestamp("2012-01-03",
-                                                                tz='UTC')
+                                                                tz=UTC)
         self.assertIn(first_trading_day_after_new_years_sunday, sessions,
                       """
  If NYE falls on a weekend, {0} the Tuesday after is the first trading day.
@@ -107,7 +127,7 @@ class XNYSCalendarTestCase(ExchangeCalendarTestBase, TestCase):
         # 20 21 22 23 24 25 26
         # 27 28 29 30 31
 
-        new_years_day = pd.Timestamp("2013-01-01", tz='UTC')
+        new_years_day = pd.Timestamp("2013-01-01", tz=UTC)
         self.assertNotIn(new_years_day, sessions,
                          """
  If NYE falls during the week, e.g. {0}, it is a holiday.
@@ -115,7 +135,7 @@ class XNYSCalendarTestCase(ExchangeCalendarTestBase, TestCase):
         )
 
         first_trading_day_after_new_years = pd.Timestamp("2013-01-02",
-                                                         tz='UTC')
+                                                         tz=UTC)
         self.assertIn(first_trading_day_after_new_years, sessions,
                       """
  If the day after NYE falls during the week, {0} \
@@ -135,12 +155,12 @@ class XNYSCalendarTestCase(ExchangeCalendarTestBase, TestCase):
         # 20 21 22 23 24 25 26
         # 27 28 29 30
 
-        start_session_label = pd.Timestamp('2005-01-01', tz='UTC')
-        end_session_label = pd.Timestamp('2012-12-31', tz='UTC')
+        start_session_label = pd.Timestamp('2005-01-01', tz=UTC)
+        end_session_label = pd.Timestamp('2012-12-31', tz=UTC)
         sessions = self.calendar.sessions_in_range(start_session_label,
                                                    end_session_label)
 
-        thanksgiving_with_four_weeks = pd.Timestamp("2005-11-24", tz='UTC')
+        thanksgiving_with_four_weeks = pd.Timestamp("2005-11-24", tz=UTC)
 
         self.assertNotIn(thanksgiving_with_four_weeks, sessions,
                          """
@@ -155,7 +175,7 @@ class XNYSCalendarTestCase(ExchangeCalendarTestBase, TestCase):
         # 12 13 14 15 16 17 18
         # 19 20 21 22 23 24 25
         # 26 27 28 29 30
-        thanksgiving_with_five_weeks = pd.Timestamp("2006-11-23", tz='UTC')
+        thanksgiving_with_five_weeks = pd.Timestamp("2006-11-23", tz=UTC)
 
         self.assertNotIn(thanksgiving_with_five_weeks, sessions,
                          """
@@ -164,7 +184,7 @@ class XNYSCalendarTestCase(ExchangeCalendarTestBase, TestCase):
         )
 
         first_trading_day_after_new_years_sunday = pd.Timestamp("2012-01-03",
-                                                                tz='UTC')
+                                                                tz=UTC)
 
         self.assertIn(first_trading_day_after_new_years_sunday, sessions,
                       """

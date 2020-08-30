@@ -89,6 +89,7 @@ class TradingCalendar(with_metaclass(ABCMeta)):
 
     For each session, we store the open and close time in UTC time.
     """
+
     def __init__(self, start=start_default, end=end_default):
         # Midnight in UTC for each trading day.
 
@@ -352,7 +353,7 @@ class TradingCalendar(with_metaclass(ABCMeta)):
             The dt that is being tested.
 
         # TODO:应该是输入normalize后的时间
-        
+
         Returns
         -------
         bool
@@ -989,7 +990,7 @@ class TradingCalendar(with_metaclass(ABCMeta)):
         merged = regular + ad_hoc
         if not merged:
             # Concat barfs if the input has length 0.
-            return pd.Series([])
+            return pd.Series([], dtype='float64')
 
         result = pd.concat(merged).sort_index()
         return result.loc[(result >= start_date) & (result <= end_date)]

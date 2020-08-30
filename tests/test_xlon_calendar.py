@@ -1,5 +1,6 @@
 from unittest import TestCase
 import pandas as pd
+from pytz import UTC
 
 from .test_trading_calendar import ExchangeCalendarTestBase
 from trading_calendars.exchange_calendar_xlon import XLONExchangeCalendar
@@ -15,22 +16,22 @@ class XLONCalendarTestCase(ExchangeCalendarTestBase, TestCase):
 
     def test_2012(self):
         expected_holidays_2012 = [
-            pd.Timestamp("2012-01-02", tz='UTC'),  # New Year's observed
-            pd.Timestamp("2012-04-06", tz='UTC'),  # Good Friday
-            pd.Timestamp("2012-04-09", tz='UTC'),  # Easter Monday
-            pd.Timestamp("2012-05-07", tz='UTC'),  # May Day
-            pd.Timestamp("2012-06-04", tz='UTC'),  # Spring Bank Holiday
-            pd.Timestamp("2012-08-27", tz='UTC'),  # Summer Bank Holiday
-            pd.Timestamp("2012-12-25", tz='UTC'),  # Christmas
-            pd.Timestamp("2012-12-26", tz='UTC'),  # Boxing Day
+            pd.Timestamp("2012-01-02", tz=UTC),  # New Year's observed
+            pd.Timestamp("2012-04-06", tz=UTC),  # Good Friday
+            pd.Timestamp("2012-04-09", tz=UTC),  # Easter Monday
+            pd.Timestamp("2012-05-07", tz=UTC),  # May Day
+            pd.Timestamp("2012-06-04", tz=UTC),  # Spring Bank Holiday
+            pd.Timestamp("2012-08-27", tz=UTC),  # Summer Bank Holiday
+            pd.Timestamp("2012-12-25", tz=UTC),  # Christmas
+            pd.Timestamp("2012-12-26", tz=UTC),  # Boxing Day
         ]
 
         for session_label in expected_holidays_2012:
             self.assertNotIn(session_label, self.calendar.all_sessions)
 
         early_closes_2012 = [
-            pd.Timestamp("2012-12-24", tz='UTC'),  # Christmas Eve
-            pd.Timestamp("2012-12-31", tz='UTC'),  # New Year's Eve
+            pd.Timestamp("2012-12-24", tz=UTC),  # Christmas Eve
+            pd.Timestamp("2012-12-31", tz=UTC),  # New Year's Eve
         ]
 
         for early_close_session_label in early_closes_2012:
@@ -39,15 +40,43 @@ class XLONCalendarTestCase(ExchangeCalendarTestBase, TestCase):
 
     def test_special_holidays(self):
         # Spring Bank 2002
-        self.assertNotIn(pd.Period("2002-06-03"), self.calendar.all_sessions)
+        self.assertNotIn(
+            pd.Timestamp("2002-06-03", tz=UTC),
+            self.calendar.all_sessions,
+        )
         # Golden Jubilee
-        self.assertNotIn(pd.Period("2002-06-04"), self.calendar.all_sessions)
+        self.assertNotIn(
+            pd.Timestamp("2002-06-04", tz=UTC),
+            self.calendar.all_sessions,
+        )
         # Royal Wedding
-        self.assertNotIn(pd.Period("2011-04-29"), self.calendar.all_sessions)
+        self.assertNotIn(
+            pd.Timestamp("2011-04-29", tz=UTC),
+            self.calendar.all_sessions,
+        )
         # Spring Bank 2012
-        self.assertNotIn(pd.Period("2012-06-04"), self.calendar.all_sessions)
+        self.assertNotIn(
+            pd.Timestamp("2012-06-04", tz=UTC),
+            self.calendar.all_sessions,
+        )
         # DiamondJubilee
-        self.assertNotIn(pd.Period("2012-06-05"), self.calendar.all_sessions)
+        self.assertNotIn(
+            pd.Timestamp("2012-06-05", tz=UTC),
+            self.calendar.all_sessions,
+        )
+        # VE Day
+        self.assertNotIn(
+            pd.Timestamp("2020-05-08", tz=UTC),
+            self.calendar.all_sessions
+        )
+
+    def test_special_non_holidays(self):
+        # May Bank Holiday was instead observed on VE Day
+        # in 2020.
+        self.assertIn(
+            pd.Timestamp("2020-05-04", tz=UTC),
+            self.calendar.all_sessions,
+        )
 
     def test_half_days(self):
 
