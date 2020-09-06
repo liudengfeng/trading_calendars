@@ -84,3 +84,4 @@ etc/solar-ecliptic-longitude/*
 *.egg-info
 report.html
 assets/style.css
+.venv/
