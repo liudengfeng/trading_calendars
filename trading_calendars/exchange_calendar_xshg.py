@@ -8,7 +8,7 @@ from pytz import timezone
 # from cnswd.setting.constants import MARKET_START
 
 from .precomputed_trading_calendar_cn import PrecomputedTradingCalendar
-
+from cnswd.scripts.trading_calendar import get_tdates, is_trading_day
 
 precomputed_shanghai_holidays = pd.to_datetime([
     "1999-01-01",
@@ -489,6 +489,17 @@ precomputed_shanghai_holidays = pd.to_datetime([
 ])
 
 
+def get_precomputed_shanghai_holidays():
+    """取决于后台数据更新时间，某个时点可能存在当日为交易日，但误为假日的情形。"""
+    tdates = pd.to_datetime(get_tdates())
+    today = pd.Timestamp.today().floor('D')
+    cond = precomputed_shanghai_holidays > today
+    fholidays = precomputed_shanghai_holidays[cond]
+    wdates = pd.date_range(tdates[0], today, freq='B')
+    hholidays = wdates.difference(tdates)
+    return hholidays.append(fholidays)
+
+
 class XSHGExchangeCalendar(PrecomputedTradingCalendar):
     """
     Exchange calendar for the Shanghai Stock Exchange (XSHG, XSSC, SSE).
@@ -513,7 +524,7 @@ class XSHGExchangeCalendar(PrecomputedTradingCalendar):
 
     @property
     def precomputed_holidays(self):
-        return precomputed_shanghai_holidays
+        return get_precomputed_shanghai_holidays()
 
     @property
     def actual_last_session(self):

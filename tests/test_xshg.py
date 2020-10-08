@@ -25,7 +25,7 @@ def test_minutes_in_range(calendar, start, end, expected):
 
 
 @pytest.mark.parametrize("dt, expected", [
-    ('2020-01-05 11:29', False), # 非交易日
+    ('2020-01-05 11:29', False),  # 非交易日
     ('2020-01-06 11:29', True),
     ('2020-01-07 11:29', True),
 ])
@@ -63,3 +63,13 @@ def test_previous_minute(calendar, dt, expected):
     dt = pd.Timestamp(dt, tz=tz).tz_convert('utc')
     actual = calendar.previous_minute(dt).tz_convert(tz)
     assert actual == pd.Timestamp(expected, tz=tz)
+
+
+def test_sessions_in_range(calendar):
+    expected = pd.to_datetime(
+        ['2020-01-22', '2020-01-23', '2020-02-03', '2020-02-04'],
+        utc=True
+    )
+    actual = calendar.sessions_in_range('2020-01-22', '2020-02-04')
+    actual.freq = None
+    assert all(expected == actual)
